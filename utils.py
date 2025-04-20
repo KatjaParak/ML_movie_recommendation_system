@@ -93,11 +93,7 @@ def similarity_df(similarity_score, movies_df):
 
 
 def get_recommendations(movie_name,sim_df,similarity_score, movies_df):
-
-    if movie_name not in sim_df.index:
-        return f"{movie_name} was not found"
-
-    index = [i for i, title in enumerate(sim_df.index) if title == movie_name][0]
+    index = [i for i, title in enumerate(sim_df.index) if title.lower() == movie_name.lower()][0]
     similar_movies = sorted(list(enumerate(similarity_score[index])), key=lambda x: x[1], reverse=True)[1:6]
     recommendations = []
     posters = []
@@ -106,8 +102,8 @@ def get_recommendations(movie_name,sim_df,similarity_score, movies_df):
     for index, similarity in similar_movies:
         item = []
         temp_df = movies_df[movies_df["title"] == sim_df.index[index]]
-        item.extend(temp_df["title"].values)
-        item.extend(temp_df["year"].values)
+        item.extend(temp_df["title"].values[:1])
+        item.extend(temp_df["year"].values[:1])
         recommendations.append(item)
         posters.append(temp_df["imdbId"].values[0])
 
