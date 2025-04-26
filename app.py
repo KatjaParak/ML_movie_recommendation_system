@@ -1,12 +1,14 @@
 from dash import Dash, html, dcc, callback, Output, Input, State
 import dash_bootstrap_components as dbc
-from utils import normalize_titles, cos_similarity, similarity_df, get_recommendations, extract_features, vectorizer
+import spacy
+from utils import normalize_titles, cos_similarity, similarity_df, get_recommendations, extract_features, vectorizer, remove_stopwords_title
 
 movies_df = extract_features()
 movies_df = normalize_titles(movies_df)
 tfidf_matrix = vectorizer(movies_df)
 similarity_score = cos_similarity(tfidf_matrix)
 sim_df = similarity_df(similarity_score,movies_df)
+filtered_titles = remove_stopwords_title(sim_df)
 
 
 app = Dash(__name__,external_stylesheets=[dbc.themes.QUARTZ])
@@ -37,32 +39,38 @@ app.layout = dbc.Container([
     State("movie-title", "value"),
 )
 def update_recommendations(n_clicks, movie_name):
+   def remove_stopwords_name(movie_name):
+            if not movie_name:
+                  return ''
+            nlp = spacy.load("en_core_web_sm")
+            doc = nlp(movie_name)
+            return ' '.join([token.text.lower() for token in doc if not token.is_stop])
+   
+   filtered_movie_name = remove_stopwords_name(movie_name)
+   recommendations, covers = get_recommendations(filtered_movie_name,sim_df, similarity_score, movies_df, filtered_titles)
+
    if n_clicks > 0:
-        if movie_name not in sim_df.index:
-                
+        if not movie_name :
                 return [dbc.Row([
+                dbc.Col(
+                    html.P("Please enter a movie title!", style={"textAlign": "center"}), width="auto"
+                )
+            ], justify="center")]
+   
+
+        if filtered_movie_name not in filtered_titles:
+            return [dbc.Row([
                 dbc.Col(
                     html.P(f"{movie_name} was not found", style={"textAlign": "center"}), width="auto"
                 )
             ], justify="center")]
 
-        if movie_name:
-            recommendations, covers = get_recommendations(movie_name,sim_df, similarity_score, movies_df)
-
-            return [dbc.Row([
+        return [dbc.Row([
                 dbc.Col([
                 html.P(rec,style={"marginTop": "3vh", "whiteSpace": "nowrap", "textAlign": "center", "overflow": "hidden", "textOverflow": "ellipsis"}),
-                html.Img(src=cover, style={"marginTop": "5vh", "width":"45%", "height": "70%","textAlign": "center", "display": "block", "margin":"0 auto" }),
+                html.Img(src=cover, style={"marginTop": "5vh", "width":"40%", "height": "70%","textAlign": "center", "display": "block", "margin":"0 auto" }),
                 
             ], style={"width": "150px"}) for rec, cover in zip(recommendations, covers)],justify="center",style={})]
-
-        else: 
-            return [dbc.Row([
-                dbc.Col(
-                    html.P("Please enter a movie title!", style={"textAlign": "center"}), width="auto"
-                )
-            ], justify="center")]
-         
 
 
 if __name__ == "__main__":
