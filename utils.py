@@ -2,7 +2,7 @@ import pandas as pd
 from functools import lru_cache
 import nltk
 from nltk.sentiment import SentimentIntensityAnalyzer
-nltk.download("vader_lexicon")
+#nltk.download("vader_lexicon", download_dir='./nltk_data')
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import re
