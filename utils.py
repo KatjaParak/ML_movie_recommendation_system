@@ -5,15 +5,15 @@ from nltk.sentiment import SentimentIntensityAnalyzer
 nltk.download("vader_lexicon")
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-import numpy as np
 import re
 import imdb
+import spacy
 
 @lru_cache
 def read_file():    
-    movies = pd.read_csv("movies.csv")
-    tags = pd.read_csv("tags.csv")
-    links = pd.read_csv("links.csv")
+    movies = pd.read_csv("Data/movies.csv")
+    tags = pd.read_csv("Data/tags.csv")
+    links = pd.read_csv("Data/links.csv")
 
     return movies, tags, links
 
@@ -91,15 +91,25 @@ def similarity_df(similarity_score, movies_df):
 
     return sim_df
 
+def remove_stopwords_title(sim_df):
+    nlp = spacy.load("en_core_web_sm")
+    filtered_titles = []
 
-def get_recommendations(movie_name,sim_df,similarity_score, movies_df):
-    index = [i for i, title in enumerate(sim_df.index) if title.lower() == movie_name.lower()][0]
+    for title in sim_df.index:
+        doc = nlp(title)
+        filtered_title = ' '.join([token.text.lower() for token in doc if not token.is_stop])
+        filtered_titles.append(filtered_title)
+    return filtered_titles
+
+
+def get_recommendations(filtered_movie_name,sim_df,similarity_score, movies_df, filtered_titles):
+    index = filtered_titles.index(filtered_movie_name.lower())
     similar_movies = sorted(list(enumerate(similarity_score[index])), key=lambda x: x[1], reverse=True)[1:6]
     recommendations = []
     posters = []
     covers = []
 
-    for index, similarity in similar_movies:
+    for index, _ in similar_movies:
         item = []
         temp_df = movies_df[movies_df["title"] == sim_df.index[index]]
         item.extend(temp_df["title"].values[:1])
