@@ -122,3 +122,4 @@ webencodings==0.5.1
 Werkzeug==3.0.6
 wrapt==1.17.2
 zipp==3.21.0
+gunicorn==21.2.0
