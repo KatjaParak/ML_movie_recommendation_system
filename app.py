@@ -1,8 +1,12 @@
 from dash import Dash, html, dcc, callback, Output, Input, State
 import dash_bootstrap_components as dbc
+import nltk
 import spacy
 from utils import normalize_titles, cos_similarity, similarity_df, get_recommendations, extract_features, vectorizer, remove_stopwords_title
+import os
 
+
+nltk.data.path.append("./nltk_data")
 movies_df = extract_features()
 movies_df = normalize_titles(movies_df)
 tfidf_matrix = vectorizer(movies_df)
@@ -74,4 +78,4 @@ def update_recommendations(n_clicks, movie_name):
 
 
 if __name__ == "__main__":
-    app.run(port=8051,debug=True)
+    app.run(host="0.0.0.0",port=int(os.environ.get("PORT", 8051)),debug=True)
