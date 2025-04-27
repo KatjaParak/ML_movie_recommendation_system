@@ -1,5 +1,5 @@
 ## Movie Recommendation Dashboard<br>
-Welcome to Movie Recommendation System!<br><br>
+
 This repo contains a simple and interactive Movie Recommendation System built with Dash and Python. The dashboard allows users to easily search for a movie and get personalized recommendations along with movie covers.
 
 
@@ -50,7 +50,7 @@ The app should be up and running on port 8050
 
 Since the collaborative-filtering algorithms struggle with cold-start problem - a scenario where a system has difficulty providing  recommendations for new users -  this method was abandoned in favor of implementing content-based filtering. 
 
-However, the chosen approach also has its own limitations. By relying on features like tags or genres, it becomes higly susceptible to creating a filter bubble and limit the diversity of recommendations (for example. entering 'Pulp Fiction' may results in predominantly Tarantimo movies recommendations). To mitigate this, sentiment analysis is applied to the tags, helping to enhance the diversity of recommendations. 
+However, the chosen approach also has its own limitations. By relying on features like tags or genres, it becomes higly susceptible to creating a filter bubble and limit the diversity of recommendations (for example. entering 'Pulp Fiction' may results in predominantly Tarantino movies recommendations). To mitigate this, sentiment analysis is applied to the tags, to some extent helping enhance the diversity of recommendations. By analyzing sentiment behind the tags, the system can filter out movies with negative or critical tags, ensuring that only neutral and positive tags remains. 
 
 
 ## Data Source
