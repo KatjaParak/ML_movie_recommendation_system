@@ -20,7 +20,7 @@ The recommendation engine employs a hybrid approach, analyzing movie attributes 
 
 Before running the application, make sure you have the following installed:
 
-- **Python 3.8** or higher
+- **Python 3.8** or higher (note that some required Python packages are incompatiable with Python 3.13)
 
 You also need to install the required libraries:
 
