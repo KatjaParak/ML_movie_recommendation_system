@@ -1,13 +1,14 @@
 import pandas as pd 
 from functools import lru_cache
-import nltk
 from nltk.sentiment import SentimentIntensityAnalyzer
-#nltk.download("vader_lexicon", download_dir='./nltk_data')
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import re
 import imdb
 import spacy
+
+nlp = spacy.load("en_core_web_sm")
+ia = imdb.IMDb()
 
 @lru_cache
 def read_file():    
@@ -47,7 +48,7 @@ def extract_features():
 
     movies_with_tags = filtered_movies.merge(tags_with_scores, on="movieId").reset_index(drop=True)
     movies_with_links = movies_with_tags.merge(filtered_links, on="movieId").reset_index(drop=True)
-    movies_with_links = movies_with_links[movies_with_links["scores"] >= 0.05]    
+    movies_with_links = movies_with_links[movies_with_links["scores"] >= 0.015]    
     movies_with_links.drop(["scores"], axis=1,inplace=True)
 
     movies_df = movies_with_links.groupby(["movieId"]).agg({"tag": lambda x: ','.join(x.unique()),
@@ -92,7 +93,6 @@ def similarity_df(similarity_score, movies_df):
     return sim_df
 
 def remove_stopwords_title(sim_df):
-    nlp = spacy.load("en_core_web_sm")
     filtered_titles = []
 
     for title in sim_df.index:
@@ -101,24 +101,23 @@ def remove_stopwords_title(sim_df):
         filtered_titles.append(filtered_title)
     return filtered_titles
 
-
+# adapted from an example found on GeeksforGeeks
 def get_recommendations(filtered_movie_name,sim_df,similarity_score, movies_df, filtered_titles):
-    index = filtered_titles.index(filtered_movie_name.lower())
+    try:
+        index = filtered_titles.index(filtered_movie_name)
+    except ValueError:
+        return None, None
     similar_movies = sorted(list(enumerate(similarity_score[index])), key=lambda x: x[1], reverse=True)[1:6]
     recommendations = []
     posters = []
     covers = []
 
     for index, _ in similar_movies:
-        item = []
         temp_df = movies_df[movies_df["title"] == sim_df.index[index]]
-        item.extend(temp_df["title"].values[:1])
-        item.extend(temp_df["year"].values[:1])
-        recommendations.append(item)
+        recommendations.append((temp_df["title"].values[0], temp_df["year"].values[0]))
         posters.append(temp_df["imdbId"].values[0])
 
     for poster in posters: 
-        ia = imdb.IMDb()
         series = ia.get_movie(poster)
         cover = series.data['cover url']
         covers.append(cover)  
