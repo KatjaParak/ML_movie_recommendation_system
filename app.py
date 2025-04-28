@@ -3,10 +3,10 @@ import dash_bootstrap_components as dbc
 import nltk
 import spacy
 from utils import normalize_titles, cos_similarity, similarity_df, get_recommendations, extract_features, vectorizer, remove_stopwords_title
-import os
 
 
 nltk.data.path.append("./nltk_data")
+nlp = spacy.load("en_core_web_sm")
 movies_df = extract_features()
 movies_df = normalize_titles(movies_df)
 tfidf_matrix = vectorizer(movies_df)
@@ -30,7 +30,7 @@ app.layout = dbc.Container([
 ], justify="center"),
     dbc.Row([
         dbc.Col(
-            html.Div(id="movie-recommendation"),
+              dcc.Loading(id="loading", type="circle",children=[html.Div([html.Div(id="movie-recommendation")])], overlay_style={"visibility": "visible", "filter":"blur(5px)"}),
             width=12
         )
     ], justify="center")
@@ -41,12 +41,12 @@ app.layout = dbc.Container([
     Output("movie-recommendation", "children"),
     Input("search-button", "n_clicks"),
     State("movie-title", "value"),
+    prevent_initial_call = True
 )
 def update_recommendations(n_clicks, movie_name):
    def remove_stopwords_name(movie_name):
             if not movie_name:
                   return ''
-            nlp = spacy.load("en_core_web_sm")
             doc = nlp(movie_name)
             return ' '.join([token.text.lower() for token in doc if not token.is_stop])
    
@@ -62,13 +62,14 @@ def update_recommendations(n_clicks, movie_name):
             ], justify="center")]
    
 
-        if filtered_movie_name not in filtered_titles:
+        if recommendations is None:
             return [dbc.Row([
                 dbc.Col(
                     html.P(f"{movie_name} was not found", style={"textAlign": "center"}), width="auto"
                 )
             ], justify="center")]
 
+        
         return [dbc.Row([
                 dbc.Col([
                 html.P(rec,style={"marginTop": "3vh", "whiteSpace": "nowrap", "textAlign": "center", "overflow": "hidden", "textOverflow": "ellipsis"}),
@@ -78,4 +79,4 @@ def update_recommendations(n_clicks, movie_name):
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0",port=int(os.environ.get("PORT", 8051)),debug=True)
+    app.run(port=8050,debug=True)
