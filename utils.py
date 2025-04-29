@@ -4,6 +4,7 @@ from nltk.sentiment import SentimentIntensityAnalyzer
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import re
+# https://pypi.org/project/imdby/
 import imdb
 import spacy
 
@@ -119,7 +120,6 @@ def get_recommendations(filtered_movie_name,sim_df,similarity_score, movies_df, 
 
     for poster in posters: 
         series = ia.get_movie(poster)
-        cover = series.data['cover url']
-        covers.append(cover)  
+        covers.append(series.data['cover url'])  
 
     return recommendations, covers
